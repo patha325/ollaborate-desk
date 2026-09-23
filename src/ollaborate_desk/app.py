@@ -8,12 +8,13 @@ import sqlite3
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
+from types import SimpleNamespace
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
-from libreindex import LibreIndex
+from .index import FileIndex
 
 DATA = Path(os.environ.get("OLL_DESK_DATA", "~/.ollaborate-desk")).expanduser().resolve()
 SOURCE = Path(os.environ.get("OLL_DESK_FILES", str(Path.home() / "Documents"))).expanduser().resolve()
@@ -27,11 +28,37 @@ STATIC = Path(__file__).parent / "static"
 
 
 def knowledge():
-    return LibreIndex(
-        SOURCE, model=MODEL,
-        embedding_model=os.environ.get("OLL_DESK_EMBEDDING", "embeddinggemma"),
-        database=DATA / "libreindex", host=OLLAMA_HOST,
-    )
+    if not SOURCE.is_dir():
+        raise NotADirectoryError(f"Source folder does not exist: {SOURCE}")
+    try:
+        from libreindex import LibreIndex
+    except ImportError:
+        return LexicalKnowledge(SOURCE, DATA / "files.sqlite3")
+    return LibreIndex(SOURCE, model=MODEL,
+                      embedding_model=os.environ.get("OLL_DESK_EMBEDDING", "embeddinggemma"),
+                      database=DATA / "libreindex", host=OLLAMA_HOST)
+
+
+class LexicalKnowledge:
+    """Standalone file retrieval when LibreIndex has not been installed."""
+
+    def __init__(self, source: Path, database: Path):
+        self.indexer = FileIndex(database, source)
+
+    def index(self):
+        result = self.indexer.rebuild()
+        if not result["chunks"]:
+            raise ValueError("No readable content found in supported files")
+        self.report = SimpleNamespace(files=result["files"], chunks=result["chunks"],
+                                      skipped=len(result["errors"]))
+        return self
+
+    def ask(self, question: str):
+        hits = self.indexer.search(question)
+        citations = [SimpleNamespace(location=item["path"], excerpt=item["excerpt"], score=0.0)
+                     for item in hits]
+        return SimpleNamespace(text="Evidence excerpts are provided below.", citations=citations,
+                               warning=None if hits else "No matching local evidence was found.")
 
 
 def gpu_status():
