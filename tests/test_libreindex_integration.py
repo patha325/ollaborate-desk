@@ -1,4 +1,6 @@
-from libreindex import LibreIndex
+import pytest
+
+LibreIndex = pytest.importorskip("libreindex").LibreIndex
 
 
 class LocalModel:
