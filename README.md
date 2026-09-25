@@ -32,6 +32,7 @@ For semantic retrieval, install LibreIndex separately, pull `embeddinggemma`, an
 | Claude Cowork | Work in a selected folder; inspect resulting artifacts | File context and draft save implemented |
 | ChatGPT Work | Specialists, evidence, review, reusable work | Specialist pipeline implemented; skills and workflows planned |
 | NVIDIA GPU | Fast local model inference and visible VRAM | Ollama acceleration and GPU status available |
+| Strands Harness | Sessions, tool gates, and scoped action runtime | [Optional integration evaluation](docs/STRANDS_HARNESS_EVALUATION.md) |
 
 The next milestone is a local action runtime: explicit folder grants, proposed file edits with diffs, approvals, rollback, and an audit log. After that, add reusable skill files, task schedules, and optional connectors limited to local or intranet applications. A fully offline machine cannot browse public websites, send internet email, or act in cloud applications. Connected work can be offered as a separately enabled mode, but must never be represented as offline.
 
