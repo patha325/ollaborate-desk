@@ -24,6 +24,18 @@ For semantic retrieval, install LibreIndex separately, pull `embeddinggemma`, an
 - User-triggered indexing and user-triggered Markdown save; existing filenames are preserved.
 - Loopback-only web service and local SQLite task store.
 
+## Odysseus integration (optional)
+
+Odysseus can launch Desk's read-only MCP companion as a local stdio server. Install the extra on the same machine as Odysseus, with packages downloaded ahead of time for an offline installation:
+
+```bash
+pip install '.[odysseus]'
+```
+
+In Odysseus **MCP servers**, add a stdio server named `Ollaborate Desk` with command set to the absolute path of the installed `ollaborate-desk-mcp` executable and empty arguments (`[]`). Set its environment to the same `OLL_DESK_DATA`, `OLL_DESK_FILES`, `OLL_DESK_MODEL`, and `OLLAMA_HOST` values as Desk, where applicable. For a containerized Odysseus installation, install Desk inside the container and mount the selected documents and Desk data into it; paths and executable must refer to the container filesystem. Index the documents in Desk first. You can verify the connection in Odysseus's MCP server list.
+
+The companion offers `search_files`, `list_drafts`, and `get_draft`. It cannot create tasks, save files, or execute commands. Odysseus may have its own model and network settings; configure its models and other tools for local use if the combined workflow must remain offline. No Odysseus source code is included here; the programs communicate over the MCP protocol. This bridge is opt-in and does not change Desk's default pipeline.
+
 ## Product direction
 
 | Inspiration | Local interpretation | State |
@@ -33,6 +45,7 @@ For semantic retrieval, install LibreIndex separately, pull `embeddinggemma`, an
 | ChatGPT Work | Specialists, evidence, review, reusable work | Specialist pipeline implemented; skills and workflows planned |
 | NVIDIA GPU | Fast local model inference and visible VRAM | Ollama acceleration and GPU status available |
 | Strands Harness | Sessions, tool gates, and scoped action runtime | [Evaluation result](evaluation/RESULTS_2026-09-25.md): retain Ollaborate default |
+| Odysseus | Local workspace consuming Desk's indexed evidence and drafts | Optional read-only MCP bridge implemented |
 
 The next milestone is a local action runtime: explicit folder grants, proposed file edits with diffs, approvals, rollback, and an audit log. After that, add reusable skill files, task schedules, and optional connectors limited to local or intranet applications. A fully offline machine cannot browse public websites, send internet email, or act in cloud applications. Connected work can be offered as a separately enabled mode, but must never be represented as offline.
 
